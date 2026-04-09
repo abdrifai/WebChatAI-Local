@@ -159,6 +159,7 @@ export function createChatState() {
 			}
 
 			let prompt = userContent;
+			let usedRagContext = false;
 
 			// RAG Logic
 			if (isRagActive) {
@@ -171,8 +172,26 @@ export function createChatState() {
 					if (ragRes.ok) {
 						const { results } = await ragRes.json();
 						if (results && results.length > 0) {
-							const context = results.map(r => r.content).join('\n---\n');
-							prompt = `Gunakan informasi berikut sebagai referensi utamamu jika relevan:\n\n${context}\n\n---\n\nPertanyaan pengguna: ${userContent}`;
+							usedRagContext = true;
+							// Dapatkan daftar file unik untuk referensi
+							const uniqueFiles = Array.from(new Set(results.map(r => r.fileName)));
+							
+							const context = results.map((r, idx) => `[Sumber ${idx+1}: ${r.fileName}]\n${r.content}`).join('\n---\n');
+							prompt = `Anda adalah asisten AI pintar. Gunakan informasi dokumen berikut sebagai referensi utama Anda untuk menjawab.
+
+PENTING:
+1. Anda WAJIB memulai jawaban Anda dengan frasa "[Berdasarkan Dokumen Local]".
+2. Berikan jawaban yang komprehensif berdasarkan informasi dari dokumen tersebut.
+3. JIka informasi tidak ditemukan di dokumen, jawab dengan pengetahuan umum Anda tapi awali dengan "Sesuai pengetahuan umum saya, ...".
+
+DOKUMEN REFERENSI:
+${context}
+
+---
+PERTANYAAN PENGGUNA: ${userContent}`;
+							
+							// Simpan daftar file unik ke metadata assistan nantinya
+							var ragSources = uniqueFiles;
 						}
 					}
 				} catch (err) {
@@ -196,7 +215,12 @@ export function createChatState() {
 				const data = await res.json();
 				conversations[chatIdx].messages = [
 					...conversations[chatIdx].messages,
-					{ role: 'assistant', content: data.response }
+					{ 
+						role: 'assistant', 
+						content: data.response, 
+						usedRag: usedRagContext,
+						ragSources: typeof ragSources !== 'undefined' ? ragSources : []
+					}
 				];
 				conversations[chatIdx].model = selectedModel;
 				conversations[chatIdx].timestamp = Date.now();

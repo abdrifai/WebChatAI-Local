@@ -30,6 +30,19 @@
 				</span>
 				<kbd class="hidden group-hover:block text-[10px] px-2 py-0.5 rounded-lg border font-mono {chat.isDarkMode ? 'border-indigo-400/30 bg-indigo-500/20 text-indigo-100' : 'border-indigo-400/30 bg-indigo-500/20 text-indigo-50'} shadow-sm">⌘N</kbd>
 			</button>
+			
+			<button 
+				onclick={() => chat.isKnowledgeManagerOpen = true}
+				class="w-full flex items-center justify-between gap-3 px-5 py-3.5 rounded-[1.25rem] transition-all font-bold mb-6 group {chat.isDarkMode ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow-lg shadow-black/10' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 shadow-sm'}"
+			>
+				<span class="flex items-center gap-2.5">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:scale-110 transition-transform duration-300"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
+					Knowledge Base
+				</span>
+				{#if chat.isRagActive}
+					<span class="flex h-2 w-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+				{/if}
+			</button>
 
 			<div class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
 				<p class="text-[10px] font-black uppercase tracking-[0.2em] mb-4 px-3 mt-2 {chat.isDarkMode ? 'text-slate-500' : 'text-slate-400'}">Riwayat Percakapan</p>

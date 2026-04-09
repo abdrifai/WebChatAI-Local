@@ -9,6 +9,7 @@
 	import ChatInput from '$lib/components/ChatInput.svelte';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
 	import ConnectionGuideModal from '$lib/components/ConnectionGuideModal.svelte';
+	import KnowledgeManager from '$lib/components/KnowledgeManager.svelte';
 
 	// Global State
 	const chat = createChatState();
@@ -75,6 +76,8 @@
 		onClose={() => showGuide = false} 
 		onCopy={handleCopy}
 	/>
+
+	<KnowledgeManager {chat} />
 
 	{#if showCopyAlert}
 		<div class="fixed top-10 right-10 z-[100] bg-emerald-500 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl animate-in fade-in slide-in-from-top-4 shadow-2xl shadow-emerald-500/20">

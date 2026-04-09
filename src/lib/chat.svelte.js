@@ -12,6 +12,8 @@ export function createChatState() {
 	let isFetchingModels = $state(false);
 	let isStartingServer = $state(false);
 	let isStoppingServer = $state(false);
+	let isRagActive = $state(true);
+	let isKnowledgeManagerOpen = $state(false);
 
 	const terminalCommand = 'OLLAMA_ORIGINS="http://localhost:5173" ollama serve';
 
@@ -119,6 +121,10 @@ export function createChatState() {
 		set isStartingServer(v) { isStartingServer = v; },
 		get isStoppingServer() { return isStoppingServer; },
 		set isStoppingServer(v) { isStoppingServer = v; },
+		get isRagActive() { return isRagActive; },
+		set isRagActive(v) { isRagActive = v; },
+		get isKnowledgeManagerOpen() { return isKnowledgeManagerOpen; },
+		set isKnowledgeManagerOpen(v) { isKnowledgeManagerOpen = v; },
 		get terminalCommand() { return terminalCommand; },
 		async copyToClipboard() {
 			if (!browser) return;
@@ -152,13 +158,35 @@ export function createChatState() {
 				}
 			}
 
+			let prompt = userContent;
+
+			// RAG Logic
+			if (isRagActive) {
+				try {
+					const ragRes = await fetch('/api/rag/search', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ prompt: userContent })
+					});
+					if (ragRes.ok) {
+						const { results } = await ragRes.json();
+						if (results && results.length > 0) {
+							const context = results.map(r => r.content).join('\n---\n');
+							prompt = `Gunakan informasi berikut sebagai referensi utamamu jika relevan:\n\n${context}\n\n---\n\nPertanyaan pengguna: ${userContent}`;
+						}
+					}
+				} catch (err) {
+					console.error('RAG search failed:', err);
+				}
+			}
+
 			try {
 				const res = await fetch('http://localhost:11434/api/generate', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						model: selectedModel,
-						prompt: userContent,
+						prompt: prompt,
 						stream: false
 					})
 				});
